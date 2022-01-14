@@ -12,8 +12,7 @@
 #include "SWCommon.h"
 #include <tchar.h>
 #include <direct.h>
-#include <string>
-#include <ctime>
+#include <io.h>
 
 #define MAX_LINE_LENGTH 256
 
@@ -31,7 +30,7 @@ SWLOG_LEVEL SWLog::m_nLogLevel = LOG_NONE;
  * @return true 
  * @return false 
  */
-bool SWLog::Init(bool bToFile, bool bTruncateLongLog, const char* c_cLogFileName)
+bool SWLog::Init(bool bToFile, bool bTruncateLongLog, PCSTR c_cLogFileName)
 {
     m_bToFile = bToFile;
     m_bTruncateLongLog = bTruncateLongLog;
@@ -46,12 +45,18 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, const char* c_cLogFileName
     //TCHAR logFileDirectory[MAX_PATH];
     std::string logFileDirectory = format_string("%s%s", fileDirectory, "\\Log\\");
     //strcpy(logFileDirectory, strcat(fileDirectory, "\\Log\\%s"));
-    if(access(logFileDirectory.c_str(), 0) == -1)
+    if(_access(logFileDirectory.c_str(), 0) == -1)
     {
-        mkdir(logFileDirectory.c_str());
+        _mkdir(logFileDirectory.c_str());
     }
-    std::string logFileName = format_string("%s%s", logFileDirectory, c_cLogFileName);
-    m_hLogFile = CreateFile(logFileName.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    std::string logFileName = format_string("%s%s", logFileDirectory.c_str(), c_cLogFileName);
+    m_hLogFile = CreateFile(logFileName.c_str(), 
+        GENERIC_READ | GENERIC_WRITE, 
+        FILE_SHARE_READ, 
+        NULL, 
+        OPEN_ALWAYS, 
+        FILE_ATTRIBUTE_NORMAL, 
+        NULL);
     if(m_hLogFile == INVALID_HANDLE_VALUE)
     {
         return false;
@@ -78,10 +83,20 @@ void SWLog::UnInit()
  * @param strTime Time string
  * @param nTimeLength Length of time string
  */
-void SWLog::GetLogTime(char *strTime, int nTimeLength)
+std::string SWLog::GetLogTime()
 {
-    std::time_t t = std::time(NULL);
-    std::strftime(strTime, nTimeLength, "%Y-%m-%d %H:%M:%S %Z", localtime(&t));
+    SYSTEMTIME st = { 0 };
+    GetLocalTime(&st);
+    // Output format control: %04d Output in four-digit digital format, zeros are added to the left of less than 4 digits
+    std::string strTime = format_string("[%04d-%02d-%02d %02d:%02d:%02d %04d]", 
+        st.wYear, 
+        st.wMonth, 
+        st.wDay, 
+        st.wHour, 
+        st.wMinute, 
+        st.wSecond, 
+        st.wMilliseconds);
+    return strTime;
 }
 
 /**
@@ -102,9 +117,6 @@ bool SWLog::Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLine
     {
         return false;
     }
-    std::time_t t = std::time(NULL);
-    char mbstr[100];
-    std::strftime(mbstr, sizeof(mbstr), "%Y-%m-%d %H:%M:%S %Z", localtime(&t));
     std::string strLogLevel;
     if(nLevel == LOG_INFO)
     {
@@ -118,17 +130,17 @@ bool SWLog::Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLine
     {
         strLogLevel = "[ERROR]";
     }
-    std::string strLogInfo = format_string("%s %s", mbstr, strLogLevel);
+    std::string strLogInfo = format_string("%s %s", GetLogTime().c_str(), strLogLevel.c_str());
     // Capture current thread ID
     DWORD dwThreadID = GetCurrentThreadId();
-    strLogInfo = format_string("%s [ThreadID: %s] [%s Line: %u] [Function: %s]", 
-        strLogInfo, dwThreadID, pszFileName, nLineNo, pszFunctionSig);
+    strLogInfo = format_string("%s [ThreadID: %u] [%s Line: %u] [Function: %s]", 
+        strLogInfo.c_str(), dwThreadID, pszFileName, nLineNo, pszFunctionSig);
     // Log message
     std::string strLogMsg;
-    va_list ap;
-    va_start(ap, pszFmt);
-    strLogMsg = format_string(ap, strLogMsg, pszFmt);
-    va_end(ap);
+    //va_list ap;
+    //va_start(ap, pszFmt);
+    strLogMsg = format_string(" Message: %s", pszFmt);
+    //va_end(ap);
 
     // If the log allows truncation, the long log only takes the first MAX_LINE_LENGTH characters
     if(m_bTruncateLongLog)

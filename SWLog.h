@@ -12,6 +12,7 @@
 #define _SWLOG_H_
 
 #include <Windows.h>
+#include <string>
 
 // log level
 enum SWLOG_LEVEL
@@ -43,7 +44,7 @@ enum SWLOG_LEVEL
 class SWLog
 {
 public:
-    static bool Init(bool bToFile, bool bTruncateLongLog, const char* c_cLogFileName);
+    static bool Init(bool bToFile, bool bTruncateLongLog, PCSTR c_cLogFileName);
     static void UnInit();
     // Don't output the thread ID number and the function signature and line number
     static bool Log(long nLevel, PCTSTR pszFmt, ...);
@@ -59,7 +60,7 @@ private:
     SWLog(const SWLog &rhs) = delete;
     SWLog& operator = (const SWLog &rhs) = delete;
 
-    static void GetLogTime(char *strTime, int nTimeLength);
+    static std::string GetLogTime();
 
 private:
     static bool m_bToFile;           // Control logging to file or console
