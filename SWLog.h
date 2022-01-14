@@ -48,11 +48,9 @@ public:
     // Don't output the thread ID number and the function signature and line number
     static bool Log(long nLevel, PCTSTR pszFmt, ...);
     // ANSI
-    static bool Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLineNo, PCTSTR pszFmt, ...);
+    // static bool Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLineNo, PCTSTR pszFmt, ...);
     // Unicode
     static bool Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLineNo, PCSTR pszFmt, ...);
-
-    char *GetCurrentTime();
 
 private:
     SWLog() = delete;
@@ -60,6 +58,8 @@ private:
 
     SWLog(const SWLog &rhs) = delete;
     SWLog& operator = (const SWLog &rhs) = delete;
+
+    static void GetLogTime(char *strTime, int nTimeLength);
 
 private:
     static bool m_bToFile;           // Control logging to file or console

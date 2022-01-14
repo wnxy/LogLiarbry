@@ -73,73 +73,15 @@ void SWLog::UnInit()
 }
 
 /**
- * @brief Don't output the thread ID number and the function signature and line number
+ * @brief Get current time for print log
  * 
- * @param nLevel Log level
- * @param pszFmt Log message
- * @param ... 
- * @return true 
- * @return false 
+ * @param strTime Time string
+ * @param nTimeLength Length of time string
  */
-bool SWLog::Log(long nLevel, PCTSTR pszFmt, ...)
+void SWLog::GetLogTime(char *strTime, int nTimeLength)
 {
-    if(nLevel <= m_nLogLevel)
-    {
-        return false;
-    }
     std::time_t t = std::time(NULL);
-    char mbstr[100];
-    std::strftime(mbstr, sizeof(mbstr), "%Y-%m-%d %H:%M:%S %Z", localtime(&t));
-    std::string strLogLevel;
-    if(nLevel == LOG_INFO)
-    {
-        strLogLevel = "[Info]";
-    }
-    else if (nLevel == LOG_WARNING)
-    {
-        strLogLevel = "[Warning]";
-    }
-    else if(nLevel == LOG_ERROR)
-    {
-        strLogLevel = "[Error]";
-    }
-    std::string strLogInfo = format_string("%s %s", mbstr, strLogLevel);
-    // Capture cuttent thread ID
-    DWORD dwThreadID = GetCurrentThreadId();
-    strLogInfo = format_string("%s [ThreadID: %s]", strLogInfo, dwThreadID);
-    // Log message
-    std::wstring strLogMsg;
-    va_list ap;
-    va_start(ap, pszFmt);
-    //strLogMsg.append()
-    strLogMsg = format_wstring(ap, strLogMsg, pszFmt);
-    va_end(ap);
-
-    // If the log allows truncation, the long log only takes the first MAX_LINE_LENGTH characters
-    if(m_bTruncateLongLog)
-    {
-        strLogMsg = strLogMsg.substr(0, MAX_LINE_LENGTH);
-    }
-    std::string strLogMsgAnsi;
-    strLogMsgAnsi = EncodeUtil::UnicodeToAnsi(strLogMsg);
-    strLogInfo += strLogMsgAnsi;
-    strLogInfo += "\r\n";
-    if(m_bToFile)
-    {
-        if(m_hLogFile == INVALID_HANDLE_VALUE)
-        {
-            return false;
-        }
-        SetFilePointer(m_hLogFile, 0, NULL, FILE_END);
-        DWORD dwByteWritten = 0;
-        WriteFile(m_hLogFile, strLogInfo.c_str(), strLogInfo.length(), &dwByteWritten, NULL);
-        FlushFileBuffers(m_hLogFile);
-        return true;
-    }
-    // Output the log to console in software release state
-    OutputDebugStringA(strLogInfo.c_str());
-
-    return true;
+    std::strftime(strTime, nTimeLength, "%Y-%m-%d %H:%M:%S %Z", localtime(&t));
 }
 
 /**
@@ -154,7 +96,7 @@ bool SWLog::Log(long nLevel, PCTSTR pszFmt, ...)
  * @return true 
  * @return false 
  */
-bool SWLog::Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLineNo, PCTSTR pszFmt, ...)
+bool SWLog::Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLineNo, PCSTR pszFmt, ...)
 {
     if(nLevel <= m_nLogLevel)
     {
@@ -211,9 +153,4 @@ bool SWLog::Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLine
     OutputDebugStringA(strLogInfo.c_str());
 
     return true;
-}
-
-bool SWLog::Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLineNo, PCSTR pszFmt, ...)
-{
-    
 }
