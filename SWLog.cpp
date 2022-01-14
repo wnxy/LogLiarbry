@@ -10,15 +10,13 @@
  */
 #include "SWLog.h"
 #include "SWCommon.h"
-#include <tchar.h>
-#include <direct.h>
 #include <io.h>
 
 #define MAX_LINE_LENGTH 256
 
 bool SWLog::m_bToFile = false;
 bool SWLog::m_bTruncateLongLog = false;
-HANDLE SWLog::m_hLogFile = INVALID_HANDLE_VALUE;
+_HANDLE_ SWLog::m_hLogFile = INVALID_HANDLE_VALUE;
 SWLOG_LEVEL SWLog::m_nLogLevel = LOG_NONE;
 
 /**
@@ -30,7 +28,7 @@ SWLOG_LEVEL SWLog::m_nLogLevel = LOG_NONE;
  * @return true 
  * @return false 
  */
-bool SWLog::Init(bool bToFile, bool bTruncateLongLog, PCSTR c_cLogFileName)
+bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
 {
     m_bToFile = bToFile;
     m_bTruncateLongLog = bTruncateLongLog;
@@ -42,13 +40,18 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, PCSTR c_cLogFileName)
     TCHAR fileDirectory[MAX_PATH];
     GetCurrentDirectory(MAX_PATH, fileDirectory);
     // Log directory
-    //TCHAR logFileDirectory[MAX_PATH];
     std::string logFileDirectory = format_string("%s%s", fileDirectory, "\\Log\\");
-    //strcpy(logFileDirectory, strcat(fileDirectory, "\\Log\\%s"));
+#ifdef _WIN64
     if(_access(logFileDirectory.c_str(), 0) == -1)
     {
         _mkdir(logFileDirectory.c_str());
     }
+#elif __linux__
+    if(access(logFileDirectory.c_str(), F_OK) == -1)
+    {
+        mkdir(logFileDirectory.c_str(), S_IRWXU);
+    }
+#endif
     std::string logFileName = format_string("%s%s", logFileDirectory.c_str(), c_cLogFileName);
     m_hLogFile = CreateFile(logFileName.c_str(), 
         GENERIC_READ | GENERIC_WRITE, 
@@ -111,7 +114,7 @@ std::string SWLog::GetLogTime()
  * @return true 
  * @return false 
  */
-bool SWLog::Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLineNo, PCSTR pszFmt, ...)
+bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long nLineNo, _PCSTR_ pszFmt, ...)
 {
     if(nLevel <= m_nLogLevel)
     {

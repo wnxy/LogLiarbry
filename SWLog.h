@@ -11,7 +11,15 @@
 #ifndef _SWLOG_H_
 #define _SWLOG_H_
 
+#ifdef _WIN64
 #include <Windows.h>
+#include <tchar.h>
+#include <direct.h>
+#elif __linux__
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
+
 #include <string>
 
 // log level
@@ -37,6 +45,14 @@ enum SWLOG_LEVEL
 
 #endif
 
+#ifdef _WIN64
+#define _PCSTR_ PCSTR
+#define _HANDLE_ HANDLE
+#elif __linux__
+#define _PCSTR_ const char*
+#define _HANDLE_ void *
+#endif
+
 /**
  * @brief Software log encapsulation class, realize log file initialization, 
  *  log level definition, log printing, etc.
@@ -44,14 +60,12 @@ enum SWLOG_LEVEL
 class SWLog
 {
 public:
-    static bool Init(bool bToFile, bool bTruncateLongLog, PCSTR c_cLogFileName);
+    static bool Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName);
     static void UnInit();
-    // Don't output the thread ID number and the function signature and line number
-    static bool Log(long nLevel, PCTSTR pszFmt, ...);
     // ANSI
     // static bool Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLineNo, PCTSTR pszFmt, ...);
     // Unicode
-    static bool Log(long nLevel, PCSTR pszFileName, PCSTR pszFunctionSig, long nLineNo, PCSTR pszFmt, ...);
+    static bool Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long nLineNo, _PCSTR_ pszFmt, ...);
 
 private:
     SWLog() = delete;
@@ -65,7 +79,7 @@ private:
 private:
     static bool m_bToFile;           // Control logging to file or console
     static bool m_bTruncateLongLog;  // Whether to truncate long logs
-    static HANDLE m_hLogFile;        // Log file handle
+    static _HANDLE_ m_hLogFile;        // Log file handle
     static SWLOG_LEVEL m_nLogLevel;  // Log level
 };
 
