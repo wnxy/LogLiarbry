@@ -55,7 +55,7 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
     getcwd(fileDirectory, PATH_SIZE);
 
     // Log directory
-    std::string logFileDirectory = format_string("%s%s", fileDirectory, "\\Log\");
+    std::string logFileDirectory = format_string("%s%s", fileDirectory, "/Log/");
     if(access(logFileDirectory.c_str(), F_OK) == -1)
     {
         mkdir(logFileDirectory.c_str(), S_IRWXU);
