@@ -54,10 +54,10 @@ enum SWLOG_LEVEL
 #endif
 
 #ifdef _WIN64
-#define _PCSTR_              PCSTR
+#define _PCSTR_       PCSTR
 #elif __linux__
-#define PATH_SIZE            255
-#define _PCSTR_              const char*
+#define PATH_SIZE     255
+#define _PCSTR_       const char*
 #endif
 
 /**

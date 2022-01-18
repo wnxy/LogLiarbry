@@ -49,7 +49,8 @@ int main()
 日志打印结果：
 
 ```
-[2022-01-18 15:07:17 0993] [INFO] [ThreadID: 187186560] [main.cpp Line: 7] [Function: int main()] Message: This is test message!
-[2022-01-18 15:07:18 0056] [ERROR] [ThreadID: 187186560] [main.cpp Line: 8] [Function: int main()] Message: 这是一条测试错误日志！
+[2022-01-18 15:26:16 0811] [INFO] [ThreadID: 3501497728] [main.cpp Line: 7] [Function: int main()] Message: This is test message!
+[2022-01-18 15:26:16 0873] [WARNING] [ThreadID: 3501497728] [main.cpp Line: 8] [Function: int main()] Message: 这是一条测试警告日志！
+[2022-01-18 15:26:16 0931] [ERROR] [ThreadID: 3501497728] [main.cpp Line: 9] [Function: int main()] Message: 这是一条测试错误日志！
 ```
 
