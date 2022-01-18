@@ -75,7 +75,7 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
         return false;
     }
 #elif __linux__
-    m_iLogFile = open(logFileName.c_str(), O_APPEND | O_CREAT, S_IRWXU);
+    m_iLogFile = open(logFileName.c_str(), O_CREAT | O_APPEND | O_RDWR, S_IRWXU);
     if(m_iLogFile == -1)
     {
         return false;
