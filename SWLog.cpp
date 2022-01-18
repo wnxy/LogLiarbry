@@ -43,18 +43,19 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
 #ifdef _WIN64
     TCHAR fileDirectory[MAX_PATH];
     GetCurrentDirectory(MAX_PATH, fileDirectory);
-#elif __linux__
-    char fileDirectory[PATH_SIZE];
-    getcwd(fileDirectory, PATH_SIZE);
-#endif
+
     // Log directory
     std::string logFileDirectory = format_string("%s%s", fileDirectory, "\\Log\\");
-#ifdef _WIN64
     if(_access(logFileDirectory.c_str(), 0) == -1)
     {
         _mkdir(logFileDirectory.c_str());
     }
 #elif __linux__
+    char fileDirectory[PATH_SIZE];
+    getcwd(fileDirectory, PATH_SIZE);
+
+    // Log directory
+    std::string logFileDirectory = format_string("%s%s", fileDirectory, "\\Log\");
     if(access(logFileDirectory.c_str(), F_OK) == -1)
     {
         mkdir(logFileDirectory.c_str(), S_IRWXU);

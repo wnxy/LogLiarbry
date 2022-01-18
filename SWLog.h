@@ -28,8 +28,6 @@
 
 #include <string>
 
-typedef char          TCHAR;
-typedef long long     LONG_PTR;
 typedef unsigned long DWORD;
 
 // log level
@@ -91,7 +89,7 @@ private:
 #ifdef _WIN64
     static HANDLE m_hLogFile;        // Log file handle
 #elif __linux__
-    static int m_iLogFile;           // Log file state
+    static int m_iLogFile;           // Log file state(approximately equal to handle)
 #endif
     static SWLOG_LEVEL m_nLogLevel;  // Log level
 };
