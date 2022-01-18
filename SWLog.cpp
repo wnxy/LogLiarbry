@@ -128,11 +128,11 @@ std::string SWLog::GetLogTime()
     struct timeval tv;
     gettimeofday(&tv, NULL);
     // millisecond
-    int millis = tv.tv_user / 1000;
+    int millis = tv.tv_usec / 1000;
     struct tm nowTime;
     localtime_r(&tv.tv_sec, &nowTime);
     char buffer[80] = {0};
-    strftime(buffer, size(buffer), "%Y-%m-%d %H:%M:%S", &nowTime);
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &nowTime);
     std::string strTime = format_string("[%s %04d]", buffer, millis);
 #endif
     return strTime;
@@ -171,7 +171,11 @@ bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long n
     }
     std::string strLogInfo = format_string("%s %s", GetLogTime().c_str(), strLogLevel.c_str());
     // Capture current thread ID
+#ifdef _WIN64
     DWORD dwThreadID = GetCurrentThreadId();
+#elif __linux__
+    DWORD dwThreadID = pthread_self();
+#endif
     strLogInfo = format_string("%s [ThreadID: %u] [%s Line: %u] [Function: %s]", 
         strLogInfo.c_str(), dwThreadID, pszFileName, nLineNo, pszFunctionSig);
     // Log message
