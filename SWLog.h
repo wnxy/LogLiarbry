@@ -15,12 +15,21 @@
 #include <Windows.h>
 #include <tchar.h>
 #include <direct.h>
+#include <io.h>
 #elif __linux__
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/time.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <unistd.h>
 #endif
 
 #include <string>
+
+typedef char          TCHAR;
+typedef long long     LONG_PTR;
+typedef unsigned long DWORD;
 
 // log level
 enum SWLOG_LEVEL
@@ -46,11 +55,10 @@ enum SWLOG_LEVEL
 #endif
 
 #ifdef _WIN64
-#define _PCSTR_ PCSTR
-#define _HANDLE_ HANDLE
+#define _PCSTR_              PCSTR
 #elif __linux__
-#define _PCSTR_ const char*
-#define _HANDLE_ void *
+#define PATH_SIZE            255
+#define _PCSTR_              const char*
 #endif
 
 /**
@@ -79,7 +87,11 @@ private:
 private:
     static bool m_bToFile;           // Control logging to file or console
     static bool m_bTruncateLongLog;  // Whether to truncate long logs
-    static _HANDLE_ m_hLogFile;        // Log file handle
+#ifdef _WIN64
+    static HANDLE m_hLogFile;        // Log file handle
+#elif __linux__
+    static int m_iLogFile;           // Log file state
+#endif
     static SWLOG_LEVEL m_nLogLevel;  // Log level
 };
 

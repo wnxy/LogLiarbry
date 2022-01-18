@@ -10,13 +10,16 @@
  */
 #include "SWLog.h"
 #include "SWCommon.h"
-#include <io.h>
 
 #define MAX_LINE_LENGTH 256
 
 bool SWLog::m_bToFile = false;
 bool SWLog::m_bTruncateLongLog = false;
-_HANDLE_ SWLog::m_hLogFile = INVALID_HANDLE_VALUE;
+#ifdef _WIN64
+HANDLE SWLog::m_hLogFile = INVALID_HANDLE_VALUE;
+#elif __linux__
+int SWLog::m_iLogFile = -1;
+#endif
 SWLOG_LEVEL SWLog::m_nLogLevel = LOG_NONE;
 
 /**
@@ -37,8 +40,13 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
     {
         return false;
     }
+#ifdef _WIN64
     TCHAR fileDirectory[MAX_PATH];
     GetCurrentDirectory(MAX_PATH, fileDirectory);
+#elif __linux__
+    char fileDirectory[PATH_SIZE];
+    getcwd(fileDirectory, PATH_SIZE);
+#endif
     // Log directory
     std::string logFileDirectory = format_string("%s%s", fileDirectory, "\\Log\\");
 #ifdef _WIN64
@@ -53,6 +61,7 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
     }
 #endif
     std::string logFileName = format_string("%s%s", logFileDirectory.c_str(), c_cLogFileName);
+#ifdef _WIN64
     m_hLogFile = CreateFile(logFileName.c_str(), 
         GENERIC_READ | GENERIC_WRITE, 
         FILE_SHARE_READ, 
@@ -64,6 +73,13 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
     {
         return false;
     }
+#elif __linux__
+    m_iLogFile = open(logFileName.c_str(), O_APPEND | O_CREAT, S_IRWXU);
+    if(m_iLogFile == -1)
+    {
+        return false;
+    }
+#endif
     return true;
 }
 
@@ -73,11 +89,19 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
  */
 void SWLog::UnInit()
 {
+#ifdef _WIN64
     if(m_hLogFile != INVALID_HANDLE_VALUE)
     {
         CloseHandle(m_hLogFile);
         m_hLogFile = INVALID_HANDLE_VALUE;
     }
+#elif __linux__
+    if(m_iLogFile != -1)
+    {
+        close(m_iLogFile);
+        m_iLogFile = -1;
+    }
+#endif
 }
 
 /**
@@ -88,6 +112,7 @@ void SWLog::UnInit()
  */
 std::string SWLog::GetLogTime()
 {
+#ifdef _WIN64
     SYSTEMTIME st = { 0 };
     GetLocalTime(&st);
     // Output format control: %04d Output in four-digit digital format, zeros are added to the left of less than 4 digits
@@ -99,6 +124,17 @@ std::string SWLog::GetLogTime()
         st.wMinute, 
         st.wSecond, 
         st.wMilliseconds);
+#elif __linux__
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    // millisecond
+    int millis = tv.tv_user / 1000;
+    struct tm nowTime;
+    localtime_r(&tv.tv_sec, &nowTime);
+    char buffer[80] = {0};
+    strftime(buffer, size(buffer), "%Y-%m-%d %H:%M:%S", &nowTime);
+    std::string strTime = format_string("[%s %04d]", buffer, millis);
+#endif
     return strTime;
 }
 
@@ -152,6 +188,7 @@ bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long n
     }
     strLogInfo += strLogMsg;
     strLogInfo += "\r\n";
+#ifdef _WIN64
     if(m_bToFile)
     {
         if(m_hLogFile == INVALID_HANDLE_VALUE)
@@ -166,6 +203,22 @@ bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long n
     }
     // Output the log to console in software release state
     OutputDebugStringA(strLogInfo.c_str());
+#elif __linux__
+    if(m_bToFile)
+    {
+        if(m_iLogFile == -1)
+        {
+            return false;
+        }
+        lseek(m_iLogFile, 0, SEEK_SET);
+        int size = write(m_iLogFile, strLogInfo.c_str(), strLogInfo.length());
+        fsync(m_iLogFile);
+        return true;
+    }
+
+    // Output the log to console in software release state
+    printf("%s", strLogInfo.c_str());
+#endif
 
     return true;
 }
