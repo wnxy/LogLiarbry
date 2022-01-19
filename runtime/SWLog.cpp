@@ -11,6 +11,10 @@
 #include "SWLog.h"
 #include "SWCommon.h"
 
+#ifndef LOG_OUTPUT
+#define LOG_OUTPUT
+#endif
+
 #define MAX_LINE_LENGTH 256
 
 bool SWLog::m_bToFile = false;
@@ -33,6 +37,7 @@ SWLOG_LEVEL SWLog::m_nLogLevel = LOG_NONE;
  */
 bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
 {
+#ifdef LOG_OUTPUT
     m_bToFile = bToFile;
     m_bTruncateLongLog = bTruncateLongLog;
 
@@ -82,6 +87,7 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
     }
 #endif
     return true;
+#endif  // LOG_OUTPUT
 }
 
 /**
@@ -90,6 +96,7 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
  */
 void SWLog::UnInit()
 {
+#ifdef LOG_OUTPUT
 #ifdef _WIN64
     if(m_hLogFile != INVALID_HANDLE_VALUE)
     {
@@ -103,6 +110,7 @@ void SWLog::UnInit()
         m_iLogFile = -1;
     }
 #endif
+#endif  // LOG_OUTPUT
 }
 
 /**
@@ -113,6 +121,7 @@ void SWLog::UnInit()
  */
 std::string SWLog::GetLogTime()
 {
+#ifdef LOG_OUTPUT
 #ifdef _WIN64
     SYSTEMTIME st = { 0 };
     GetLocalTime(&st);
@@ -137,6 +146,7 @@ std::string SWLog::GetLogTime()
     std::string strTime = format_string("[%s %04d]", buffer, millis);
 #endif
     return strTime;
+#endif  // LOG_OUTPUT
 }
 
 /**
@@ -153,6 +163,7 @@ std::string SWLog::GetLogTime()
  */
 bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long nLineNo, _PCSTR_ pszFmt, ...)
 {
+#ifdef LOG_OUTPUT
     if(nLevel <= m_nLogLevel)
     {
         return false;
@@ -177,14 +188,14 @@ bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long n
 #elif __linux__
     DWORD dwThreadID = pthread_self();
 #endif
-    strLogInfo = format_string("%s [ThreadID: %u] [%s Line: %u] [Function: %s]", 
+    strLogInfo = format_string("%s [ThreadID: %u] [%s Line: %u] [Function: %s] Message: ", 
         strLogInfo.c_str(), dwThreadID, pszFileName, nLineNo, pszFunctionSig);
     // Log message
     std::string strLogMsg;
-    //va_list ap;
-    //va_start(ap, pszFmt);
-    strLogMsg = format_string(" Message: %s", pszFmt);
-    //va_end(ap);
+    va_list ap;
+    va_start(ap, pszFmt);
+    strLogMsg = format_string(pszFmt, ap);
+    va_end(ap);
 
     // If the log allows truncation, the long log only takes the first MAX_LINE_LENGTH characters
     if(m_bTruncateLongLog)
@@ -226,4 +237,5 @@ bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long n
 #endif
 
     return true;
+#endif  // LOG_OUTPUT
 }

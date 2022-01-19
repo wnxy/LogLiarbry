@@ -1,5 +1,23 @@
-# SoftwareLogLiarbry
-C++ 软件日志库，可以在Windows和Linux平台下稳定工作，采用同步打印日志的方式，满足软件对日志打印的需求，使用时只需要引入相关头文件。
+# LogLiarbry
+# 一、客户端日志库
+
+## 1、相关文件
+
+```
+SWLog.h
+SWLog.cpp
+SWCommon.h
+```
+
+## 2、日志库特点
+
+- 使用C++编写，可以跨平台工作（支持Windows和Linux平台）
+- 采用同步打印日志的方式，平均每条日志打印时间80ms左右
+- 日志信息支持格式化输出
+- 使用简单，只需要引入相关头文件
+- 多线程安全
+
+## 3、详细信息
 
 使用前需要初始化，API为：
 
@@ -19,7 +37,7 @@ bool Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName);
 日志打印完毕后建议释放资源，API为：
 
 ```c++
-void UnInit()
+void UnInit();
 ```
 
 日志等级分为：
@@ -53,4 +71,6 @@ int main()
 [2022-01-18 15:26:16 0873] [WARNING] [ThreadID: 3501497728] [main.cpp Line: 8] [Function: int main()] Message: 这是一条测试警告日志！
 [2022-01-18 15:26:16 0931] [ERROR] [ThreadID: 3501497728] [main.cpp Line: 9] [Function: int main()] Message: 这是一条测试错误日志！
 ```
+
+性能测试：
 
