@@ -1,15 +1,20 @@
 #include <iostream>
 #include <chrono>
+#include <thread>
 #include "../runtime/SWLog.h"
 
 void runBenchmark();
+void getLog(int i);
 
 int main()
 {
-	SWLog::Init(true, false, "test.txt");
-	LOG_INFO("This is test message!");
-	LOG_WARNING("这是一条测试警告日志！");
-	LOG_ERROR("这是一条测试错误日志！");
+	SWLog::Init(false, false, "test.txt");
+    for(int i = 1; i < 6; ++i)
+    {
+        std::thread t{getLog, i};
+        t.detach();
+        //t.join();
+    }
 	SWLog::UnInit();
 	std::cout << "Hello CMake." << std::endl;
 	return 0;
@@ -44,4 +49,24 @@ void runBenchmark() {
     printf("Flushing the log statements to disk took an additional "
                 "%0.2lf secs\r\n", time_span);
 */
+}
+
+void getLog(int i)
+{
+    switch(i)
+    {
+        /*case 1: LOG_INFO("1111111111"); break;
+        case 2: LOG_INFO("2222222222"); break;
+        case 3: LOG_INFO("3333333333"); break;
+        case 4: LOG_INFO("4444444444"); break;
+        case 5: LOG_INFO("5555555555"); break;
+        default: break;*/
+        case 1: LOG_INFO("广州广州广州广州广州"); break;
+        case 2: LOG_INFO("深圳深圳深圳深圳深圳"); break;
+        case 3: LOG_INFO("西安西安西安西安西安"); break;
+        case 4: LOG_INFO("长沙长沙长沙长沙长沙"); break;
+        case 5: LOG_INFO("南京南京南京南京南京"); break;
+        default: break;
+    }
+    //sleep(0.05);
 }

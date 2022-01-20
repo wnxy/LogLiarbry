@@ -4,9 +4,9 @@
  * @brief Source file of software library
  * @version 0.1
  * @date 2022-01-11
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 #include "SWLog.h"
 #include "SWCommon.h"
@@ -26,14 +26,16 @@ int SWLog::m_iLogFile = -1;
 #endif
 SWLOG_LEVEL SWLog::m_nLogLevel = LOG_NONE;
 
+std::mutex mut;
+
 /**
  * @brief Log file initialier
- * 
+ *
  * @param bToFile Define logging to file or console
  * @param bTruncateLongLog Truncate long log true/false
  * @param c_cLogFileName Log filename
- * @return true 
- * @return false 
+ * @return true
+ * @return false
  */
 bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
 {
@@ -41,81 +43,84 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
     m_bToFile = bToFile;
     m_bTruncateLongLog = bTruncateLongLog;
 
-    if(c_cLogFileName == nullptr)
+    if (bToFile == true && c_cLogFileName == nullptr)
     {
         return false;
     }
+    else
+    {
 #ifdef _WIN64
-    TCHAR fileDirectory[MAX_PATH];
-    GetCurrentDirectory(MAX_PATH, fileDirectory);
+        TCHAR fileDirectory[MAX_PATH];
+        GetCurrentDirectory(MAX_PATH, fileDirectory);
 
-    // Log directory
-    std::string logFileDirectory = format_string("%s%s", fileDirectory, "\\Log\\");
-    if(_access(logFileDirectory.c_str(), 0) == -1)
-    {
-        _mkdir(logFileDirectory.c_str());
-    }
+        // Log directory
+        std::string logFileDirectory = format_string("%s%s", fileDirectory, "\\Log\\");
+        if (_access(logFileDirectory.c_str(), 0) == -1)
+        {
+            _mkdir(logFileDirectory.c_str());
+        }
 #elif __linux__
-    char fileDirectory[PATH_SIZE];
-    getcwd(fileDirectory, PATH_SIZE);
+        char fileDirectory[PATH_SIZE];
+        getcwd(fileDirectory, PATH_SIZE);
 
-    // Log directory
-    std::string logFileDirectory = format_string("%s%s", fileDirectory, "/Log/");
-    if(access(logFileDirectory.c_str(), F_OK) == -1)
-    {
-        mkdir(logFileDirectory.c_str(), S_IRWXU);
-    }
+        // Log directory
+        std::string logFileDirectory = format_string("%s%s", fileDirectory, "/Log/");
+        if (access(logFileDirectory.c_str(), F_OK) == -1)
+        {
+            mkdir(logFileDirectory.c_str(), S_IRWXU);
+        }
 #endif
-    std::string logFileName = format_string("%s%s", logFileDirectory.c_str(), c_cLogFileName);
+        std::string logFileName = format_string("%s%s", logFileDirectory.c_str(), c_cLogFileName);
 #ifdef _WIN64
-    m_hLogFile = CreateFile(logFileName.c_str(), 
-        GENERIC_READ | GENERIC_WRITE, 
-        FILE_SHARE_READ, 
-        NULL, 
-        OPEN_ALWAYS, 
-        FILE_ATTRIBUTE_NORMAL, 
-        NULL);
-    if(m_hLogFile == INVALID_HANDLE_VALUE)
-    {
-        return false;
-    }
+        m_hLogFile = CreateFile(logFileName.c_str(),
+                                GENERIC_READ | GENERIC_WRITE,
+                                FILE_SHARE_READ,
+                                NULL,
+                                OPEN_ALWAYS,
+                                FILE_ATTRIBUTE_NORMAL,
+                                NULL);
+        if (m_hLogFile == INVALID_HANDLE_VALUE)
+        {
+            return false;
+        }
 #elif __linux__
-    m_iLogFile = open(logFileName.c_str(), O_CREAT | O_APPEND | O_RDWR, S_IRWXU);
-    if(m_iLogFile == -1)
-    {
-        return false;
-    }
+        m_iLogFile = open(logFileName.c_str(), O_CREAT | O_APPEND | O_RDWR, S_IRWXU);
+        if (m_iLogFile == -1)
+        {
+            return false;
+        }
 #endif
+    }
     return true;
-#endif  // LOG_OUTPUT
+#endif // LOG_OUTPUT
 }
 
 /**
  * @brief Close log file handle
- * 
+ *
  */
 void SWLog::UnInit()
 {
 #ifdef LOG_OUTPUT
 #ifdef _WIN64
-    if(m_hLogFile != INVALID_HANDLE_VALUE)
+    if (m_hLogFile != INVALID_HANDLE_VALUE)
     {
         CloseHandle(m_hLogFile);
         m_hLogFile = INVALID_HANDLE_VALUE;
     }
 #elif __linux__
-    if(m_iLogFile != -1)
+    if (m_iLogFile != -1)
     {
         close(m_iLogFile);
         m_iLogFile = -1;
     }
 #endif
-#endif  // LOG_OUTPUT
+#endif // LOG_OUTPUT
 }
 
 /**
  * @brief Get current time for print log
- * 
+ *
  * @param strTime Time string
  * @param nTimeLength Length of time string
  */
@@ -123,17 +128,17 @@ std::string SWLog::GetLogTime()
 {
 #ifdef LOG_OUTPUT
 #ifdef _WIN64
-    SYSTEMTIME st = { 0 };
+    SYSTEMTIME st = {0};
     GetLocalTime(&st);
     // Output format control: %04d Output in four-digit digital format, zeros are added to the left of less than 4 digits
-    std::string strTime = format_string("[%04d-%02d-%02d %02d:%02d:%02d %04d]", 
-        st.wYear, 
-        st.wMonth, 
-        st.wDay, 
-        st.wHour, 
-        st.wMinute, 
-        st.wSecond, 
-        st.wMilliseconds);
+    std::string strTime = format_string("[%04d-%02d-%02d %02d:%02d:%02d %04d]",
+                                        st.wYear,
+                                        st.wMonth,
+                                        st.wDay,
+                                        st.wHour,
+                                        st.wMinute,
+                                        st.wSecond,
+                                        st.wMilliseconds);
 #elif __linux__
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -146,38 +151,38 @@ std::string SWLog::GetLogTime()
     std::string strTime = format_string("[%s %04d]", buffer, millis);
 #endif
     return strTime;
-#endif  // LOG_OUTPUT
+#endif // LOG_OUTPUT
 }
 
 /**
- * @brief 
- * 
+ * @brief
+ *
  * @param nLevel Log level
  * @param pszFileName Current filename
  * @param pszFunctionSig Current function name
  * @param nLineNo Current lineNo
  * @param pszFmt Log message
- * @param ... 
- * @return true 
- * @return false 
+ * @param ...
+ * @return true
+ * @return false
  */
 bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long nLineNo, _PCSTR_ pszFmt, ...)
 {
 #ifdef LOG_OUTPUT
-    if(nLevel <= m_nLogLevel)
+    if (nLevel <= m_nLogLevel)
     {
         return false;
     }
     std::string strLogLevel;
-    if(nLevel == LOG_INFO)
+    if (nLevel == LOG_INFO)
     {
         strLogLevel = "[INFO]";
     }
-    else if(nLevel == LOG_WARNING)
+    else if (nLevel == LOG_WARNING)
     {
         strLogLevel = "[WARNING]";
     }
-    else if(nLevel == LOG_ERROR)
+    else if (nLevel == LOG_ERROR)
     {
         strLogLevel = "[ERROR]";
     }
@@ -188,8 +193,8 @@ bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long n
 #elif __linux__
     DWORD dwThreadID = pthread_self();
 #endif
-    strLogInfo = format_string("%s [ThreadID: %u] [%s Line: %u] [Function: %s] Message: ", 
-        strLogInfo.c_str(), dwThreadID, pszFileName, nLineNo, pszFunctionSig);
+    strLogInfo = format_string("%s [ThreadID: %u] [%s Line: %u] [Function: %s] Message: ",
+                               strLogInfo.c_str(), dwThreadID, pszFileName, nLineNo, pszFunctionSig);
     // Log message
     std::string strLogMsg;
     va_list ap;
@@ -198,44 +203,52 @@ bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long n
     va_end(ap);
 
     // If the log allows truncation, the long log only takes the first MAX_LINE_LENGTH characters
-    if(m_bTruncateLongLog)
+    if (m_bTruncateLongLog)
     {
         strLogMsg = strLogMsg.substr(0, MAX_LINE_LENGTH);
     }
     strLogInfo += strLogMsg;
     strLogInfo += "\r\n";
 #ifdef _WIN64
-    if(m_bToFile)
+    if (m_bToFile)
     {
-        if(m_hLogFile == INVALID_HANDLE_VALUE)
+        if (m_hLogFile == INVALID_HANDLE_VALUE)
         {
             return false;
         }
-        SetFilePointer(m_hLogFile, 0, NULL, FILE_END);
-        DWORD dwByteWritten = 0;
-        WriteFile(m_hLogFile, strLogInfo.c_str(), strLogInfo.length(), &dwByteWritten, NULL);
-        FlushFileBuffers(m_hLogFile);
+        {
+            std::lock_guard<std::mutex> mtxLocker(mut);
+            SetFilePointer(m_hLogFile, 0, NULL, FILE_END);
+            DWORD dwByteWritten = 0;
+            WriteFile(m_hLogFile, strLogInfo.c_str(), strLogInfo.length(), &dwByteWritten, NULL);
+            FlushFileBuffers(m_hLogFile);
+        }
         return true;
     }
     // Output the log to console in software release state
+    std::lock_guard<std::mutex> mtxLocker(mut);
     OutputDebugStringA(strLogInfo.c_str());
 #elif __linux__
-    if(m_bToFile)
+    if (m_bToFile)
     {
-        if(m_iLogFile == -1)
+        if (m_iLogFile == -1)
         {
             return false;
         }
-        lseek(m_iLogFile, 0, SEEK_SET);
-        int size = write(m_iLogFile, strLogInfo.c_str(), strLogInfo.length());
-        fsync(m_iLogFile);
+        {
+            std::lock_guard<std::mutex> mtxLocker(mut);
+            lseek(m_iLogFile, 0, SEEK_SET);
+            int size = write(m_iLogFile, strLogInfo.c_str(), strLogInfo.length());
+            fsync(m_iLogFile);
+        }
         return true;
     }
 
     // Output the log to console in software release state
+    std::lock_guard<std::mutex> mtxLocker(mut);
     printf("%s", strLogInfo.c_str());
 #endif
 
     return true;
-#endif  // LOG_OUTPUT
+#endif // LOG_OUTPUT
 }

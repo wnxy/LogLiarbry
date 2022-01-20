@@ -4,9 +4,9 @@
  * @brief Common function of software log liarbry, header file
  * @version 0.1
  * @date 2022-01-11
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 #ifndef _SWCOMMON_H_
 #define _SWCOMMON_H_
@@ -17,21 +17,21 @@
 
 /**
  * @brief String format output
- * 
- * @param format 
- * @param args 
- * @return std::string 
+ *
+ * @param format
+ * @param args
+ * @return std::string
  */
-inline std::string format_string(const char* format, va_list args)
+inline std::string format_string(const char *format, va_list args)
 {
     constexpr size_t oldlen = BUFSIZ;
-    char buffer[oldlen];  // Buffers on the default stack
+    char buffer[oldlen]; // Buffers on the default stack
     va_list argscopy;
     va_copy(argscopy, args);
     size_t newlen = vsnprintf(&buffer[0], oldlen, format, args) + 1;
-    newlen ++;            // Add terminator '\0'
-    if(newlen > oldlen)   // Buffer on the default stack isn't enough, allocate from the heap
-    {  
+    newlen++;            // Add terminator '\0'
+    if (newlen > oldlen) // Buffer on the default stack isn't enough, allocate from the heap
+    {
         std::vector<char> newbuffer(newlen);
         vsnprintf(newbuffer.data(), newlen, format, argscopy);
         return newbuffer.data();
@@ -41,12 +41,12 @@ inline std::string format_string(const char* format, va_list args)
 
 /**
  * @brief String format output
- * 
- * @param format 
- * @param ... 
- * @return std::string 
+ *
+ * @param format
+ * @param ...
+ * @return std::string
  */
-inline std::string format_string(const char* format, ...)
+inline std::string format_string(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -56,4 +56,4 @@ inline std::string format_string(const char* format, ...)
     return s;
 }
 
-#endif  // _SWCOMMON_H_
+#endif // _SWCOMMON_H_
