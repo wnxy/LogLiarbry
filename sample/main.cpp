@@ -9,64 +9,63 @@ void getLog(int i);
 int main()
 {
 	SWLog::Init(false, false, "test.txt");
-    for(int i = 1; i < 6; ++i)
-    {
-        std::thread t{getLog, i};
-        t.detach();
-        //t.join();
-    }
+	/*
+	for(int i = 1; i < 6; ++i)
+	{
+		std::thread t{getLog, i};
+		t.detach();
+		//t.join();
+	}
+	*/
+	runBenchmark();
 	SWLog::UnInit();
 	std::cout << "Hello CMake." << std::endl;
 	return 0;
 }
 
-void runBenchmark() {
-    const uint64_t RECORDS = 1000;
+void runBenchmark()
+{
+	const uint64_t RECORDS = 1000;
 
-    std::chrono::high_resolution_clock::time_point start, stop;
-    double time_span;
+	std::chrono::high_resolution_clock::time_point start, stop;
+	double time_span;
 
-    start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < RECORDS; ++i) 
-    {
-        LOG_INFO("Simple log message with 0 parameters");
-    }
-    stop = std::chrono::high_resolution_clock::now();
+	start = std::chrono::high_resolution_clock::now();
+	for (int i = 0; i < RECORDS; ++i)
+	{
+		LOG_INFO("Simple log message with 0 parameters");
+	}
+	stop = std::chrono::high_resolution_clock::now();
 
-    time_span = std::chrono::duration_cast<std::chrono::duration<double>>(
-                                                        stop - start).count();
-    printf("The total time spent invoking LOG_INFO with no parameters %lu "
-            "times took %0.2lf seconds (%0.2lf ns/message average)\r\n",
-            RECORDS, time_span, (time_span/RECORDS)*1e9);
-/*
-    start = std::chrono::high_resolution_clock::now();
-    // Flush all pending log messages to disk
-    NanoLog::sync();
-    stop = std::chrono::high_resolution_clock::now();
-
-    time_span = std::chrono::duration_cast<std::chrono::duration<double>>(
-                                                        stop - start).count();
-    printf("Flushing the log statements to disk took an additional "
-                "%0.2lf secs\r\n", time_span);
-*/
+	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(
+					stop - start)
+					.count();
+	printf("The total time spent invoking LOG_INFO with no parameters %lu "
+		   "times took %0.2lf seconds (%0.2lf ns/message average)\r\n",
+		   RECORDS, time_span, (time_span / RECORDS) * 1e9);
 }
 
 void getLog(int i)
 {
-    switch(i)
-    {
-        /*case 1: LOG_INFO("1111111111"); break;
-        case 2: LOG_INFO("2222222222"); break;
-        case 3: LOG_INFO("3333333333"); break;
-        case 4: LOG_INFO("4444444444"); break;
-        case 5: LOG_INFO("5555555555"); break;
-        default: break;*/
-        case 1: LOG_INFO("广州广州广州广州广州"); break;
-        case 2: LOG_INFO("深圳深圳深圳深圳深圳"); break;
-        case 3: LOG_INFO("西安西安西安西安西安"); break;
-        case 4: LOG_INFO("长沙长沙长沙长沙长沙"); break;
-        case 5: LOG_INFO("南京南京南京南京南京"); break;
-        default: break;
-    }
-    //sleep(0.05);
+	switch (i)
+	{
+	case 1:
+		LOG_INFO("广州广州广州广州广州");
+		break;
+	case 2:
+		LOG_INFO("深圳深圳深圳深圳深圳");
+		break;
+	case 3:
+		LOG_INFO("西安西安西安西安西安");
+		break;
+	case 4:
+		LOG_INFO("长沙长沙长沙长沙长沙");
+		break;
+	case 5:
+		LOG_INFO("南京南京南京南京南京");
+		break;
+	default:
+		break;
+	}
+	// sleep(0.05);
 }

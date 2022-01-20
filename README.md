@@ -23,8 +23,8 @@ SWCommon.h
 
 ```c++
 /**
- * @brief Log file initialier
- * 
+ * @brief Log file initialier.
+ * If the first parameter specifies the output log to the console, the third parameter can be omitted.
  * @param bToFile Define logging to file or console
  * @param bTruncateLongLog Truncate long log true/false
  * @param c_cLogFileName Log filename
@@ -51,26 +51,33 @@ LOG_ERROR(...)
 使用实例：
 
 ```c++
-#include "SWLog.h"
+SWLog::Init(true, false, "test.txt");     // 使用前需要初始化日志模块
+LOG_INFO("This is test message!");        // LOG_INFO LOG_WARNING LOG_ERROR使用方式相同
+SWLog::UnInit();                          // 使用后建议卸载日志模块
 
-int main()
+// 日志打印的格式化输出与printf()函数相同
+for (int i = 0; i < RECORDS; ++i) 
 {
-  SWLog::Init(true, false, "test.txt");
-  LOG_INFO("This is test message!");
-  LOG_WARNING("这是一条测试警告日志！");
-  LOG_ERROR("这是一条测试错误日志！");
-  SWLog::UnInit();
-  return 0;
+    LOG_INFO("Number %d,simple log message with 0 parameters", i);
 }
 ```
 
 日志打印结果：
 
 ```
-[2022-01-18 15:26:16 0811] [INFO] [ThreadID: 3501497728] [main.cpp Line: 7] [Function: int main()] Message: This is test message!
-[2022-01-18 15:26:16 0873] [WARNING] [ThreadID: 3501497728] [main.cpp Line: 8] [Function: int main()] Message: 这是一条测试警告日志！
-[2022-01-18 15:26:16 0931] [ERROR] [ThreadID: 3501497728] [main.cpp Line: 9] [Function: int main()] Message: 这是一条测试错误日志！
+[2022-01-20 10:15:25 0796] [INFO] [ThreadID: 3449112384] [sample/main.cpp Line: 37] [Function: void runBenchmark()] Message: Number 0,simple log message with 0 parameters
+[2022-01-20 10:15:25 0873] [INFO] [ThreadID: 3449112384] [sample/main.cpp Line: 37] [Function: void runBenchmark()] Message: Number 1,simple log message with 0 parameters
+[2022-01-20 10:15:25 0940] [INFO] [ThreadID: 3449112384] [sample/main.cpp Line: 37] [Function: void runBenchmark()] Message: Number 2,simple log message with 0 parameters
+[2022-01-20 10:15:26 0006] [INFO] [ThreadID: 3449112384] [sample/main.cpp Line: 37] [Function: void runBenchmark()] Message: Number 3,simple log message with 0 parameters
+[2022-01-20 10:15:26 0073] [INFO] [ThreadID: 3449112384] [sample/main.cpp Line: 37] [Function: void runBenchmark()] Message: Number 4,simple log message with 0 parameters
 ```
 
-性能测试：
+运行sample测试：
+
+```makefile
+# 在项目文件夹下运行
+make           # 编译文件        
+make clean     # 清空编译结果
+make run       # 运行示例
+```
 

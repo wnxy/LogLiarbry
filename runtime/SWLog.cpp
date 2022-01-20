@@ -29,8 +29,8 @@ SWLOG_LEVEL SWLog::m_nLogLevel = LOG_NONE;
 std::mutex mut;
 
 /**
- * @brief Log file initialier
- *
+ * @brief Log file initialier.
+ * If the first parameter specifies the output log to the console, the third parameter can be omitted.
  * @param bToFile Define logging to file or console
  * @param bTruncateLongLog Truncate long log true/false
  * @param c_cLogFileName Log filename
@@ -46,6 +46,10 @@ bool SWLog::Init(bool bToFile, bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
     if (bToFile == true && c_cLogFileName == nullptr)
     {
         return false;
+    }
+    else if(bToFile == false)
+    {
+        return true;
     }
     else
     {
