@@ -8,16 +8,16 @@ void getLog(int i);
 
 int main()
 {
-	SWLog::Init(false, false, "test.txt");
-	/*
+	//SWLog::Init(true, false, "test.txt");
+	SWLog::Init(false, false);
 	for(int i = 1; i < 6; ++i)
 	{
 		std::thread t{getLog, i};
 		t.detach();
 		//t.join();
 	}
-	*/
-	runBenchmark();
+	Sleep(500);
+	//runBenchmark();
 	SWLog::UnInit();
 	std::cout << "Hello CMake." << std::endl;
 	return 0;
@@ -67,5 +67,4 @@ void getLog(int i)
 	default:
 		break;
 	}
-	// sleep(0.05);
 }

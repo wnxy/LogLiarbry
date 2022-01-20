@@ -1,5 +1,5 @@
 main: main.o SWLog.o
-	g++ main.o SWLog.o -o main
+	g++ main.o SWLog.o -o main -lpthread
 
 main.o: sample/main.cpp
 	g++ -c sample/main.cpp -o main.o
