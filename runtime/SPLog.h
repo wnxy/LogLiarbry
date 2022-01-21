@@ -14,6 +14,7 @@
 #ifdef _WIN64
 #include <Windows.h>
 #include <direct.h>
+#include <io.h>
 #elif __linux__
 #include <sys/stat.h>
 #include <sys/types.h>
