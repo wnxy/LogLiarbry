@@ -17,6 +17,11 @@
 #elif __linux__
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <condition_variable>
 #endif
 
 #include <string>
@@ -25,26 +30,38 @@
 #include <mutex>
 #include <time.h>
 
+typedef unsigned long DWORD;
+
 enum SPLOG_LEVEL
 {
     LOG_NONE,
-    LOG_INFO;
+    LOG_INFO,
     LOG_WARNING,
     LOG_ERROR,
 };
+
+#ifdef _MSC_VER
 
 #define LOG_INFO(...) SPLog::AddLogToCache(LOG_INFO, __FILE__, __FUNCSIG__, __LINE__, __VA_ARGS__);
 #define LOG_WARNING(...) SPLog::AddLogToCache(LOG_WARNING, __FILE__, __FUNCSIG__, __LINE__, __VA_ARGS__);
 #define LOG_ERROR(...) SPLog::AddLogToCache(LOG_ERROR, __FILE__, __FUNCSIG__, __LINE__, __VA_ARGS__);
 
+#elif __GNUC__
+
+#define LOG_INFO(...) SPLog::AddLogToCache(LOG_INFO, __FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__);
+#define LOG_WARNING(...) SPLog::AddLogToCache(LOG_WARNING, __FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__);
+#define LOG_ERROR(...) SPLog::AddLogToCache(LOG_ERROR, __FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__);
+
+#endif
+
 #ifdef _WIN64
 #define _PCSTR_ PCSTR
 #elif __linux__
-#define INVALID_HANDLE_VALUE -1;
+#define INVALID_HANDLE_VALUE -1
 #define _PCSTR_ const char *
-#define MAX_PATH 260;
-#define TCHAR char;
-#define HANDLE int;
+#define MAX_PATH 260
+#define TCHAR char
+#define HANDLE int
 #endif
 
 /**
@@ -63,8 +80,8 @@ private:
     SPLog() = delete;
     ~SPLog() = delete;
 
-    SWLog(const SPLog &rhs) = delete;
-    SWLog &operator=(const SPLog &rhs) = delete;
+    SPLog(const SPLog &rhs) = delete;
+    SPLog &operator=(const SPLog &rhs) = delete;
 
     static std::string GetLogTime();
     static void logOutputThread();

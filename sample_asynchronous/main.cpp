@@ -1,5 +1,6 @@
 #include <iostream>
 #include <thread>
+#include <chrono>
 #include "../runtime/SPLog.h"
 
 void runBenchmark();
@@ -7,9 +8,9 @@ void getLog(int i);
 
 int main()
 {
-	SWLog::Init(false, "test_asyn.txt");
+	SPLog::Init(false, "test_asyn.txt");
 	runBenchmark();
-	SWLog::UnInit();
+	SPLog::UnInit();
 	std::cout << "Hello CMake." << std::endl;
 	return 0;
 }
@@ -24,7 +25,7 @@ void runBenchmark()
 	start = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < RECORDS; ++i)
 	{
-		LOG_INFO("Simple log message with 0 parameters");
+		LOG_INFO("Number %d,simple log message with 0 parameters", i);
 	}
 	stop = std::chrono::high_resolution_clock::now();
 

@@ -11,8 +11,10 @@
 #include "SPLog.h"
 #include "Common.h"
 
+#define MAX_LINE_LENGTH 256
+
 bool SPLog::m_bTruncateLongLog = false;
-bool SPLog::m_nLogLevel = LOG_NONE;
+SPLOG_LEVEL SPLog::m_nLogLevel = LOG_NONE;
 HANDLE SPLog::m_hLogFile = INVALID_HANDLE_VALUE;
 
 std::mutex mut;
@@ -36,8 +38,9 @@ bool SPLog::Init(bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
     else
     {
         TCHAR fileDirectory[MAX_PATH];
-        GetCurrentDirectory(MAX_PATH, fileDirectory);
 #ifdef _WIN64
+        GetCurrentDirectory(MAX_PATH, fileDirectory);
+
         // Log directory
         std::string logFileDirectory = format_string("%s%s", fileDirectory, "\\Log\\");
         if (_access(logFileDirectory.c_str(), 0) == -1)
@@ -45,11 +48,13 @@ bool SPLog::Init(bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
             _mkdir(logFileDirectory.c_str());
         }
 #elif __linux__
+        getcwd(fileDirectory, MAX_PATH);
+
         // Log directory
         std::string logFileDirectory = format_string("%s%s", fileDirectory, "/Log/");
-        if (access(logFileDirectory.c_str(), 0) == -1)
+        if (access(logFileDirectory.c_str(), F_OK) == -1)
         {
-            mkdir(logFileDirectory.c_str());
+            mkdir(logFileDirectory.c_str(), S_IRWXU);
         }
 #endif
         std::string logFileName = format_string("%s%s", logFileDirectory.c_str(), c_cLogFileName);
@@ -62,7 +67,7 @@ bool SPLog::Init(bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
                                 FILE_ATTRIBUTE_NORMAL,
                                 NULL);
 #elif __linux__
-        m_iLogFile = open(logFileName.c_str(), O_CREAT | O_APPEND | O_RDWR, S_IRWXU);
+        m_hLogFile = open(logFileName.c_str(), O_CREAT | O_APPEND | O_RDWR, S_IRWXU);
 #endif
         if (m_hLogFile == INVALID_HANDLE_VALUE)
         {
@@ -213,9 +218,9 @@ void SPLog::writeLogInfo(std::string strLog)
 #elif __linux__
     {
         std::lock_guard<std::mutex> mtxLocker(mut);
-        lseek(m_iLogFile, 0, SEEK_SET);
-        int size = write(m_iLogFile, strLog.c_str(), strLog.length());
-        fsync(m_iLogFile);
+        lseek(m_hLogFile, 0, SEEK_SET);
+        int size = write(m_hLogFile, strLog.c_str(), strLog.length());
+        fsync(m_hLogFile);
     }
 #endif
 }
