@@ -1,5 +1,5 @@
 /**
- * @file SWCommon.h
+ * @file Common.h
  * @author XiaoYin Niu (you@domain.com)
  * @brief Common function of software log liarbry, header file
  * @version 0.1
@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2022
  *
  */
-#ifndef _SWCOMMON_H_
-#define _SWCOMMON_H_
+#ifndef _COMMON_H_
+#define _COMMON_H_
 
 #include <cstdarg>
 #include <vector>
@@ -56,4 +56,4 @@ inline std::string format_string(const char *format, ...)
     return s;
 }
 
-#endif // _SWCOMMON_H_
+#endif // _COMMON_H_

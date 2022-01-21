@@ -1,7 +1,8 @@
 /**
  * @file swlog.h
  * @author XiaoYin Niu (you@domain.com)
- * @brief header file of software library
+ * @brief Header file of software library, the logs are printed synchronously, 
+ * and the average printing time of each log is about 80ms.
  * @version 0.1
  * @date 2022-01-11
  *
@@ -42,15 +43,15 @@ enum SWLOG_LEVEL
 
 #ifdef _MSC_VER
 
-#define LOG_INFO(...) SWLog::Log(LOG_INFO, __FILE__, __FUNCSIG__, __LINE__, __VA_ARGS__);
+#define LOG_INFO(...)    SWLog::Log(LOG_INFO, __FILE__, __FUNCSIG__, __LINE__, __VA_ARGS__);
 #define LOG_WARNING(...) SWLog::Log(LOG_WARNING, __FILE__, __FUNCSIG__, __LINE__, __VA_ARGS__);
-#define LOG_ERROR(...) SWLog::Log(LOG_ERROR, __FILE__, __FUNCSIG__, __LINE__, __VA_ARGS__);
+#define LOG_ERROR(...)   SWLog::Log(LOG_ERROR, __FILE__, __FUNCSIG__, __LINE__, __VA_ARGS__);
 
 #elif __GNUC__
 
-#define LOG_INFO(...) SWLog::Log(LOG_INFO, __FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__);
+#define LOG_INFO(...)    SWLog::Log(LOG_INFO, __FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__);
 #define LOG_WARNING(...) SWLog::Log(LOG_WARNING, __FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__);
-#define LOG_ERROR(...) SWLog::Log(LOG_ERROR, __FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__);
+#define LOG_ERROR(...)   SWLog::Log(LOG_ERROR, __FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__);
 
 #endif
 

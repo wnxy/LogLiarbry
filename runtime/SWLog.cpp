@@ -1,7 +1,8 @@
 /**
  * @file SWLog.cpp
  * @author XiaoYin Niu (you@domain.com)
- * @brief Source file of software library
+ * @brief Source file of software library, the logs are printed synchronously, 
+ * and the average printing time of each log is about 80ms.
  * @version 0.1
  * @date 2022-01-11
  *
@@ -9,7 +10,7 @@
  *
  */
 #include "SWLog.h"
-#include "SWCommon.h"
+#include "Common.h"
 
 #ifndef LOG_OUTPUT
 #define LOG_OUTPUT
@@ -124,9 +125,8 @@ void SWLog::UnInit()
 
 /**
  * @brief Get current time for print log
- *
- * @param strTime Time string
- * @param nTimeLength Length of time string
+ * 
+ * @return std::string 
  */
 std::string SWLog::GetLogTime()
 {
@@ -159,7 +159,7 @@ std::string SWLog::GetLogTime()
 }
 
 /**
- * @brief
+ * @brief Log output interface
  *
  * @param nLevel Log level
  * @param pszFileName Current filename
@@ -167,8 +167,8 @@ std::string SWLog::GetLogTime()
  * @param nLineNo Current lineNo
  * @param pszFmt Log message
  * @param ...
- * @return true
- * @return false
+ * @return true Write log succeed
+ * @return false Write log failed
  */
 bool SWLog::Log(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long nLineNo, _PCSTR_ pszFmt, ...)
 {
