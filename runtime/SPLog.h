@@ -31,6 +31,8 @@
 #include <mutex>
 #include <time.h>
 #include <functional>
+#include <memory>
+#include <thread>
 
 typedef unsigned long DWORD;
 

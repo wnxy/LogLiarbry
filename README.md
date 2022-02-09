@@ -96,10 +96,68 @@ Common.h
 ## 2. 日志库的特点
 
 - 使用C++编写，可以跨平台工作（支持Windows和Linux平台）
-- 采用异步打印日志的方式，满足对性能要求较高的服务器软件使用
+- 采用异步打印日志的方式，~~满足对性能要求较高的服务器软件使用~~
 - 日志信息支持格式化输出
 - 使用简单，只需要引入相关头文件
 - 多线程安全
 
 ## 3. 详细信息
 
+使用前需要初始化，API为：
+
+```c++
+/**
+ * @brief Log file initialier.
+ * @param bTruncateLongLog Truncate long log true/false
+ * @param c_cLogFileName Log filename
+ * @return true 
+ * @return false 
+ */
+bool Init(bool bTruncateLongLog, _PCSTR_ c_cLogFileName);
+```
+
+日志打印完毕后建议释放资源，API为：
+
+```c++
+void UnInit();
+```
+
+日志等级分为：
+
+```
+LOG_INFO(...)   
+LOG_WARNING(...) 
+LOG_ERROR(...)  
+```
+
+使用实例：
+
+```c++
+SPLog::Init(false, "test_asyn.txt");      // 使用前需要初始化日志模块
+LOG_INFO("This is test message!");        // LOG_INFO LOG_WARNING LOG_ERROR使用方式相同
+SWLog::UnInit();                          // 使用后建议卸载日志模块
+
+// 日志打印的格式化输出与printf()函数相同
+for (int i = 0; i < RECORDS; ++i) 
+{
+    LOG_INFO("Number %d,simple log message with 0 parameters", i);
+}
+```
+
+日志打印结果：
+
+```
+[2022-01-09 16:29:33 0943] [INFO] [ThreadID: 800315200] [main.cpp Line: 28] [Function: void runBenchmark()] Message: Number 0,simple log message with 0 parameters
+[2022-01-09 16:29:33 0943] [INFO] [ThreadID: 800315200] [main.cpp Line: 28] [Function: void runBenchmark()] Message: Number 1,simple log message with 0 parameters
+[2022-01-09 16:29:33 0943] [INFO] [ThreadID: 800315200] [main.cpp Line: 28] [Function: void runBenchmark()] Message: Number 2,simple log message with 0 parameters
+[2022-01-09 16:29:33 0943] [INFO] [ThreadID: 800315200] [main.cpp Line: 28] [Function: void runBenchmark()] Message: Number 3,simple log message with 0 parameters
+```
+
+运行sample_asynchronous测试：
+
+```makefile
+# 在项目文件夹下运行
+make           # 编译文件        
+make clean     # 清空编译结果
+make run       # 运行示例
+```

@@ -1,7 +1,7 @@
 /**
  * @file SPLog.cpp
  * @author XiaoYin Niu (you@domain.com)
- * @brief Source file of server library,
+ * @brief Source file of server library, the logs are printed asynchronous.
  * @version 0.1
  * @date 2022-01-20
  *
@@ -25,8 +25,8 @@ std::condition_variable cv;
 /**
  * @brief Log file initialier
  *
- * @param bTruncateLongLog
- * @param c_cLogFileName
+ * @param bTruncateLongLog Truncate long log true/false
+ * @param c_cLogFileName Log filename
  * @return true
  * @return false
  */
@@ -124,13 +124,13 @@ std::string SPLog::GetLogTime()
 }
 
 /**
- * @brief 
+ * @brief Add log messages to the log queue
  * 
- * @param nLevel 
- * @param pszFileName 
- * @param pszFunctionSig 
- * @param nLineNo 
- * @param pszFmt 
+ * @param nLevel Log level
+ * @param pszFileName Current fileename
+ * @param pszFunctionSig Current function name
+ * @param nLineNo Current lineNo
+ * @param pszFmt Log message
  * @param ... 
  */
 void SPLog::AddLogToCache(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long nLineNo, _PCSTR_ pszFmt, ...)
