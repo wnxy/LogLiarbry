@@ -16,6 +16,8 @@
 bool SPLog::m_bTruncateLongLog = false;
 SPLOG_LEVEL SPLog::m_nLogLevel = LOG_NONE;
 HANDLE SPLog::m_hLogFile = INVALID_HANDLE_VALUE;
+std::list<std::string> SPLog::logCache;
+std::shared_ptr<std::thread> SPLog::spThread;
 
 std::mutex mut;
 std::condition_variable cv;
@@ -74,6 +76,8 @@ bool SPLog::Init(bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
             return false;
         }
     }
+    spThread.reset(new std::thread(std::bind(SPLog::logOutputThread)));
+
     return true;
 }
 
@@ -83,6 +87,8 @@ bool SPLog::Init(bool bTruncateLongLog, _PCSTR_ c_cLogFileName)
  */
 void SPLog::UnInit()
 {
+    spThread->join();
+
     if (m_hLogFile != INVALID_HANDLE_VALUE)
     {
 #ifdef _WIN64
@@ -195,9 +201,9 @@ void SPLog::logOutputThread()
             cv.wait(mtxLocker);
         }
         strLog = logCache.front();
+        writeLogInfo(strLog);
         logCache.pop_front();
     }
-    writeLogInfo(strLog);
 }
 
 /**
@@ -209,7 +215,7 @@ void SPLog::writeLogInfo(std::string strLog)
 {
 #ifdef _WIN64
     {
-        std::lock_guard<std::mutex> mtxLocker(mut);
+        //std::lock_guard<std::mutex> mtxLocker(mut);
         SetFilePointer(m_hLogFile, 0, NULL, FILE_END);
         DWORD dwByteWritten = 0;
         WriteFile(m_hLogFile, strLog.c_str(), strLog.length(), &dwByteWritten, NULL);
@@ -217,7 +223,7 @@ void SPLog::writeLogInfo(std::string strLog)
     }
 #elif __linux__
     {
-        std::lock_guard<std::mutex> mtxLocker(mut);
+        //std::lock_guard<std::mutex> mtxLocker(mut);
         lseek(m_hLogFile, 0, SEEK_SET);
         int size = write(m_hLogFile, strLog.c_str(), strLog.length());
         fsync(m_hLogFile);

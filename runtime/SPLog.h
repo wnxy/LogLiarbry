@@ -30,6 +30,7 @@
 #include <chrono>
 #include <mutex>
 #include <time.h>
+#include <functional>
 
 typedef unsigned long DWORD;
 
@@ -93,6 +94,7 @@ private:
     static SPLOG_LEVEL m_nLogLevel; // Log level
     static HANDLE m_hLogFile;
     static std::list<std::string> logCache;
+    static std::shared_ptr<std::thread> spThread;
 };
 
 #endif // _SPLOG_H_
