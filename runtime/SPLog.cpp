@@ -125,13 +125,13 @@ std::string SPLog::GetLogTime()
 
 /**
  * @brief Add log messages to the log queue
- * 
+ *
  * @param nLevel Log level
  * @param pszFileName Current fileename
  * @param pszFunctionSig Current function name
  * @param nLineNo Current lineNo
  * @param pszFmt Log message
- * @param ... 
+ * @param ...
  */
 void SPLog::AddLogToCache(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionSig, long nLineNo, _PCSTR_ pszFmt, ...)
 {
@@ -184,7 +184,7 @@ void SPLog::AddLogToCache(long nLevel, _PCSTR_ pszFileName, _PCSTR_ pszFunctionS
 
 /**
  * @brief Asynchronous write log thread
- * 
+ *
  */
 void SPLog::logOutputThread()
 {
@@ -208,14 +208,14 @@ void SPLog::logOutputThread()
 
 /**
  * @brief Write log messages to file
- * 
+ *
  * @param strLog Log message
  */
 void SPLog::writeLogInfo(std::string strLog)
 {
 #ifdef _WIN64
     {
-        //std::lock_guard<std::mutex> mtxLocker(mut);
+        // std::lock_guard<std::mutex> mtxLocker(mut);
         SetFilePointer(m_hLogFile, 0, NULL, FILE_END);
         DWORD dwByteWritten = 0;
         WriteFile(m_hLogFile, strLog.c_str(), strLog.length(), &dwByteWritten, NULL);
@@ -223,7 +223,7 @@ void SPLog::writeLogInfo(std::string strLog)
     }
 #elif __linux__
     {
-        //std::lock_guard<std::mutex> mtxLocker(mut);
+        // std::lock_guard<std::mutex> mtxLocker(mut);
         lseek(m_hLogFile, 0, SEEK_SET);
         int size = write(m_hLogFile, strLog.c_str(), strLog.length());
         fsync(m_hLogFile);

@@ -1,7 +1,7 @@
 /**
  * @file SPLog.h
  * @author XiaoYin Niu (you@domain.com)
- * @brief Header file of server library,
+ * @brief Header file of server library, the logs are printed asynchronous.
  * @version 0.1
  * @date 2022-01-20
  *
